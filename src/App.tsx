@@ -1,9 +1,9 @@
-import { Box, Button,TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import {
   SIZE,
   createEmptyBoard,
-  generateRegionsFromSolution,
+  generateRegions,
   generateSolution,
   isValidMove,
   checkWin,
@@ -13,7 +13,6 @@ import {
 import BackGround from "./assets/BackGround.png";
 
 export default function App() {
-
   const [board, setBoard] = useState<CellState[][]>([]);
   const [regions, setRegions] = useState<number[][]>([]);
   const [solution, setSolution] = useState<any[]>([]);
@@ -23,9 +22,15 @@ export default function App() {
   const [name, setName] = useState("");
 
   const startGame = () => {
+    let sol;
+    let reg:any;
 
-    const sol = generateSolution()!;
-    const reg = generateRegionsFromSolution(sol);
+    do {
+      sol = generateSolution()!;
+      reg = generateRegions();
+    } while (
+      new Set(sol.map(q => reg[q.row][q.col])).size !== SIZE
+    );
 
     setSolution(sol);
     setRegions(reg);
@@ -38,7 +43,6 @@ export default function App() {
   }, []);
 
   const handleTap = (r: number, c: number) => {
-
     if (won) return;
 
     const newBoard = board.map(row => [...row]);
@@ -46,16 +50,11 @@ export default function App() {
 
     if (cell === "empty") {
       newBoard[r][c] = "x";
-    }
-
-    else if (cell === "x") {
-
+    } else if (cell === "x") {
       if (isValidMove(board, regions, r, c)) {
         newBoard[r][c] = "queen";
       }
-    }
-
-    else {
+    } else {
       newBoard[r][c] = "empty";
     }
 
@@ -67,7 +66,6 @@ export default function App() {
   };
 
   const solvePuzzle = () => {
-
     const solved = createEmptyBoard();
 
     solution.forEach(q => {
@@ -79,7 +77,6 @@ export default function App() {
   };
 
   return (
-
     <Box
       sx={{
         minHeight: "100vh",
@@ -92,7 +89,6 @@ export default function App() {
         alignItems: "center"
       }}
     >
-
       {visible ? (
         <Box
           sx={{
@@ -101,69 +97,48 @@ export default function App() {
             borderRadius: 3,
             textAlign: "center",
             width: 300,
-            m:'0.5rem'
+            m: "0.5rem"
           }}
         >
-
-          <Typography
-            color="white"
-            mb={2}
-            fontSize={18}
-          >
+          <Typography color="white" mb={2} fontSize={18}>
             Enter Player Name
           </Typography>
 
-         <TextField
+          <TextField
             label="Name"
             variant="outlined"
             fullWidth
             sx={{
-              mb:3,
-              input: {
-                color: "white"
-              },
-              label: {
-                color: "white"
-              },
-              "& label.Mui-focused": {
-                color: "white"
-              },
+              mb: 3,
+              input: { color: "white" },
+              label: { color: "white" },
+              "& label.Mui-focused": { color: "white" },
               "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "white"
-                },
-                "&:hover fieldset": {
-                  borderColor: "white"
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "white"
-                }
+                "& fieldset": { borderColor: "white" },
+                "&:hover fieldset": { borderColor: "white" },
+                "&.Mui-focused fieldset": { borderColor: "white" }
               }
             }}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
           />
 
-       {name?
-        <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => setVisible(false)}
-          
-            sx={{                 
+          {name && (
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => setVisible(false)}
+              sx={{
                 minWidth: 120,
                 color: "white",
                 borderColor: "white"
-             }}
-          >
-            Start Game
-          </Button>:''}
-
+              }}
+            >
+              Start Game
+            </Button>
+          )}
         </Box>
-
       ) : (
-
-
         <Box
           sx={{
             background: "rgba(0,0,0,0.65)",
@@ -172,17 +147,16 @@ export default function App() {
             boxShadow: "0 0 30px rgba(0,0,0,0.9)",
             width: "100%",
             maxWidth: 420,
-            m:'0.5rem'
+            m: "0.5rem"
           }}
         >
-
           <Typography
             mb={2}
             textAlign="center"
             sx={{
               color: "#fff",
               textShadow: "0 0 10px black",
-              fontSize:'2rem'
+              fontSize: "2rem"
             }}
           >
             Hello {name} Play Well
@@ -193,14 +167,11 @@ export default function App() {
             gridTemplateColumns={`repeat(${SIZE}, 1fr)`}
             gap={0.4}
           >
-
             {board.map((row, r) =>
               row.map((cell, c) => {
-
                 const color = regions[r]?.[c] ?? 0;
 
                 return (
-
                   <Box
                     key={`${r}-${c}`}
                     onClick={() => handleTap(r, c)}
@@ -218,25 +189,17 @@ export default function App() {
                       background: `hsl(${color * 45},70%,85%)`
                     }}
                   >
-
                     {cell === "queen" && (
-                      <span style={{ textShadow: "0 0 8px gold" }}>
-                        ♛
-                      </span>
+                      <span style={{ textShadow: "0 0 8px gold" }}>♛</span>
                     )}
-
                     {cell === "x" && "✕"}
-
                   </Box>
-
                 );
               })
             )}
-
           </Box>
 
           {won && (
-
             <Typography
               mt={2}
               textAlign="center"
@@ -248,24 +211,17 @@ export default function App() {
             >
               Congratulations Puzzle Solved!
             </Typography>
-
           )}
 
-          <Box
-            mt={2}
-            display="flex"
-            gap={2}
-            justifyContent="center"
-          >
-
+          <Box mt={2} display="flex" gap={2} justifyContent="center">
             <Button
               variant="outlined"
               onClick={startGame}
-              sx={{                 
+              sx={{
                 minWidth: 120,
                 color: "white",
                 borderColor: "white"
-             }}
+              }}
             >
               Reset
             </Button>
@@ -281,14 +237,9 @@ export default function App() {
             >
               Solve
             </Button>
-
           </Box>
-
         </Box>
-
       )}
-
     </Box>
-
   );
 }
